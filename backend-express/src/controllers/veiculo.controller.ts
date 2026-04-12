@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { listarVeiculos, buscarPorPlaca, criarVeiculo, validarPlaca } from '../services/veiculo.service';
+import { ListarVeiculosFiltros, PaginacaoParams } from '../types';
 
 const criarVeiculoSchema = z.strictObject({
   placa: z.string().min(7).max(8),
@@ -11,13 +12,49 @@ const criarVeiculoSchema = z.strictObject({
   cor: z.string().min(2),
 });
 
+const paginacaoSchema = z.strictObject({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+const filtroVeiculosSchema = z.strictObject({
+  placa: z.string().min(7).max(8).optional(),
+  proprietario: z.string().optional(),
+  modelo: z.string().optional(),
+  anoMin: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1).optional(),
+  anoMax: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1).optional()
+});
+
+const listarVeiculosQuerySchema = paginacaoSchema.merge(filtroVeiculosSchema).refine((data)=> data.anoMin === undefined || data.anoMax === undefined || data.anoMin <= data.anoMax,
+  {
+    message: 'anoMin não pode ser maior que anoMax',
+    path: ['anoMin']
+  }
+);
+
 export async function listar(req: Request, res: Response): Promise<void> {
-  const page = Math.max(1, parseInt(req.query.page as string) || 1);
-  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
-  const status = req.query.status as string | undefined;
+  const parsed = await listarVeiculosQuerySchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
+    return;
+  }
+
+  const paginacao:PaginacaoParams = {
+    page: parsed.data.page,
+    limit:  parsed.data.limit
+  }
+
+  const filtros:ListarVeiculosFiltros = {
+    proprietario: parsed.data.proprietario,
+    modelo: parsed.data.modelo,
+    anoMin: parsed.data.anoMin,
+    anoMax: parsed.data.anoMax,
+    placa: parsed.data.placa
+  }
 
   try {
-    const resultado = await listarVeiculos(page, limit, status);
+    const resultado = await listarVeiculos(paginacao, filtros);
     res.json(resultado);
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao listar veículos' });

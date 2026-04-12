@@ -1,5 +1,5 @@
 import { queryAsync, getAsync, runAsync } from '../database/db';
-import { Veiculo, RespostaPaginada } from '../types';
+import { Veiculo, RespostaPaginada, ListarVeiculosFiltros, PaginacaoParams } from '../types';
 
 export function validarPlaca(placa: string): boolean {
   // Formato antigo: ABC1234 | Formato Mercosul: ABC1D23
@@ -8,27 +8,54 @@ export function validarPlaca(placa: string): boolean {
 }
 
 export async function listarVeiculos(
-  page: number,
-  limit: number,
-  _status?: string
+  paginacao: PaginacaoParams,
+  filtros: ListarVeiculosFiltros = {}
 ): Promise<RespostaPaginada<Veiculo>> {
-  const offset = (page - 1) * limit;
+  const offset = (paginacao.page - 1) * paginacao.limit;
+
+  const parametros: unknown[] = [];
+  const where: string[] = [];
+
+  if (filtros.proprietario?.trim()) {
+    where.push('proprietario LIKE ? COLLATE NOCASE');
+    parametros.push(`%${filtros.proprietario.trim()}%`);
+  }
+
+  if (filtros.modelo?.trim()) {
+    where.push('modelo LIKE ? COLLATE NOCASE');
+    parametros.push(`%${filtros.modelo.trim()}%`);
+  }
+
+  if (filtros.anoMin !== undefined) {
+    where.push('ano >= ?');
+    parametros.push(filtros.anoMin);
+  }
+
+  if (filtros.anoMax !== undefined) {
+    where.push('ano <= ?');
+    parametros.push(filtros.anoMax);
+  }
+
+  if (filtros.placa?.trim()) {
+    where.push('placa = ?');
+    parametros.push(filtros.placa.trim().toUpperCase());
+  }
+
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  const sqlLista = `SELECT * FROM veiculos ${whereSql} ORDER BY criado_em DESC LIMIT ? OFFSET ?`;
+  const sqlTotal = `SELECT COUNT(*) as total FROM veiculos ${whereSql}`;
 
   const [veiculos, contagem] = await Promise.all([
-    queryAsync<Veiculo>(
-      'SELECT * FROM veiculos ORDER BY criado_em DESC LIMIT ? OFFSET ?',
-      [limit, offset]
-    ),
-    queryAsync<{ total: number }>(
-      'SELECT COUNT(*) as total FROM veiculos'
-    ),
+    queryAsync<Veiculo>(sqlLista, [...parametros, paginacao.limit, offset]),
+    queryAsync<{ total: number }>(sqlTotal, parametros),
   ]);
 
   return {
     data: veiculos,
     total: contagem[0]?.total ?? 0,
-    page,
-    limit,
+    page: paginacao.page,
+    limit: paginacao.limit,
   };
 }
 

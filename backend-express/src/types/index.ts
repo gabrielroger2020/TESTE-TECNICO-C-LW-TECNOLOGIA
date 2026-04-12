@@ -36,11 +36,9 @@ export interface DebitoCalculado extends Debito {
   valor_total: number;
 }
 
-export interface PaginacaoQuery {
-  page?: string;
-  limit?: string;
-  status?: string;
-  placa?: string;
+export interface PaginacaoParams {
+  page: number;
+  limit: number;
 }
 
 export interface RespostaPaginada<T> {
@@ -48,6 +46,15 @@ export interface RespostaPaginada<T> {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface ListarVeiculosFiltros {
+  status?: string;
+  proprietario?: string;
+  modelo?: string
+  anoMin?: number;
+  anoMax?: number;
+  placa?: string;
 }
 
 declare global {
