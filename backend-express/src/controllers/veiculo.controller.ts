@@ -58,7 +58,7 @@ export async function criar(req: Request, res: Response): Promise<void> {
 
   try {
     const veiculo = await criarVeiculo(parsed.data);
-    res.status(200).json(veiculo);
+    res.status(201).json(veiculo);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro ao criar veículo';
     res.status(msg.includes('UNIQUE') ? 409 : 500).json({ erro: msg });
