@@ -5,6 +5,7 @@ import {
   buscarDebitoPorId,
   criarDebito,
   atualizarStatusDebito,
+  quitarDebito,
 } from '../services/debito.service';
 
 const criarDebitoSchema = z.strictObject({
@@ -95,6 +96,42 @@ export async function atualizarStatus(req: Request, res: Response): Promise<void
     const msg = err instanceof Error ? err.message : 'Erro ao atualizar status';
     res.status(msg === 'Débito não encontrado' ? 404 : 500).json({ erro: msg });
   }
+}
+
+export async function quitar(req: Request, res: Response): Promise<void> {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    res.status(400).json({ erro: 'Dados inválidos' });
+    return;
+  }
+
+  try{
+
+    const debito = await quitarDebito(id);
+    res.json({
+      mensagem: 'Débito quitado com sucesso!',
+      debito
+    });
+
+  }catch(err){
+
+    const msg = err instanceof Error ? err.message : 'Erro ao quitar débito';
+
+    if (msg === 'Débito não encontrado') {
+      res.status(404).json({ erro: msg });
+      return;
+    }
+
+    if (msg === 'Débito já foi pago') {
+      res.status(409).json({ erro: msg });
+      return;
+    }
+
+    res.status(500).json({ erro: msg });
+
+  }
+
 }
 
 export async function resumo(req: Request, res: Response): Promise<void> {

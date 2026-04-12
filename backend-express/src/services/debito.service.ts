@@ -68,6 +68,29 @@ export async function criarDebito(dados: Omit<Debito, 'id' | 'criado_em'>): Prom
   return calcularTotais(debito);
 }
 
+export async function quitarDebito(id: number){
+
+  const debito = await buscarDebitoPorId(id);
+
+  if (!debito) {
+    throw new Error('Débito não encontrado');
+  }
+
+  if(debito.status == 'PAGO'){
+    throw new Error('Débito já foi pago');
+  }
+
+  await atualizarStatusDebito(id, 'PAGO');
+
+  const debitoAtualizado = await buscarDebitoPorId(id);
+
+  if(!debitoAtualizado){
+    throw new Error('Erro ao quitar débito.');
+  }
+
+  return debitoAtualizado;
+}
+
 export async function atualizarStatusDebito(id: number, status: Debito['status']): Promise<void> {
   const { changes } = await runAsync(
     'UPDATE debitos SET status = ? WHERE id = ?',
