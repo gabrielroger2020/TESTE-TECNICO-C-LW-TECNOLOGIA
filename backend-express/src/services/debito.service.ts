@@ -16,7 +16,7 @@ export function calcularTotais(debito: Debito): DebitoCalculado {
 }
 
 export async function buscarDebitosPorPlaca(placa: string): Promise<DebitoCalculado[]> {
-  const veiculo = getAsync<Veiculo>(
+  const veiculo = await getAsync<Veiculo>(
     'SELECT * FROM veiculos WHERE placa = ?',
     [placa.toUpperCase()]
   );
