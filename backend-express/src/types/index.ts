@@ -36,6 +36,12 @@ export interface DebitoCalculado extends Debito {
   valor_total: number;
 }
 
+export interface DebitoComVeiculo extends Debito {
+  placa: string;
+  proprietario: string;
+  modelo: string;
+}
+
 export interface ResumoDebitosPorTipo {
   IPVA?: number;
   MULTA?: number;
@@ -49,6 +55,20 @@ export interface ResumoDebitos {
   totalDebitos: number;
   valorTotal: number;
   porTipo: ResumoDebitosPorTipo;
+}
+
+export interface ItemRelatorioInadimplencia {
+  placa: string;
+  proprietario: string;
+  modelo: string;
+  totalDebitosVencidos: number;
+  valorTotalVencido: number;
+}
+
+export interface RelatorioInadimplencia {
+  veiculos: ItemRelatorioInadimplencia[];
+  totalVeiculos: number;
+  valorTotalGeral: number;
 }
 
 export interface PaginacaoParams {

@@ -5,6 +5,7 @@ import { inicializarBanco } from './database/db';
 import authRoutes from './routes/auth.routes';
 import veiculoRoutes from './routes/veiculo.routes';
 import debitoRoutes from './routes/debito.routes';
+import relatorioRoutes from './routes/relatorio.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/veiculos', veiculoRoutes);
 app.use('/api/debitos', debitoRoutes);
+app.use('/api/relatorios', relatorioRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
