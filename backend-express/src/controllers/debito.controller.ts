@@ -6,7 +6,9 @@ import {
   criarDebito,
   atualizarStatusDebito,
   quitarDebito,
+  resumoPorPlaca,
 } from '../services/debito.service';
+import { validarPlaca } from '../services/veiculo.service';
 
 const criarDebitoSchema = z.strictObject({
   veiculo_id: z.number().int().positive(),
@@ -24,12 +26,21 @@ const listarDebitosQuerySchema = z.strictObject({
   tipo: z.enum(['IPVA','MULTA','LICENCIAMENTO','DPVAT']).optional()
 });
 
+const resumoQuerySchema = z.strictObject({
+  placa: z.string().min(7).max(8)
+})
+
 export async function listarPorPlaca(req: Request, res: Response): Promise<void> {
   const { placa } = req.params;
   const parsed = listarDebitosQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {
     res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
+    return;
+  }
+
+  if(!validarPlaca(placa)){
+    res.status(400).json({ erro: 'Formato de placa inválido' });
     return;
   }
   
@@ -135,5 +146,34 @@ export async function quitar(req: Request, res: Response): Promise<void> {
 }
 
 export async function resumo(req: Request, res: Response): Promise<void> {
-  res.status(501).json({ erro: 'Não implementado' });
+  const parsed = resumoQuerySchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
+    return;
+  }
+
+  if(!validarPlaca(parsed.data.placa)){
+    res.status(400).json({ erro: 'Formato de placa inválido' });
+    return;
+  }
+
+  try {
+    const resumoDebitos = await resumoPorPlaca(parsed.data.placa);
+
+    res.json(resumoDebitos);
+
+  } catch (err) {
+
+    const msg = err instanceof Error ? err.message : 'Erro ao gerar resumo';
+
+    if (msg === 'Veículo não encontrado') {
+      res.status(404).json({ erro: msg });
+      return;
+    }
+
+    res.status(500).json({ erro: msg });
+
+  }
+
 }

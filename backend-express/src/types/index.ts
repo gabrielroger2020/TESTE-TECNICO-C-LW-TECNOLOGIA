@@ -36,6 +36,21 @@ export interface DebitoCalculado extends Debito {
   valor_total: number;
 }
 
+export interface ResumoDebitosPorTipo {
+  IPVA?: number;
+  MULTA?: number;
+  LICENCIAMENTO?: number;
+  DPVAT?: number;
+}
+
+export interface ResumoDebitos {
+  placa: string;
+  proprietario: string;
+  totalDebitos: number;
+  valorTotal: number;
+  porTipo: ResumoDebitosPorTipo;
+}
+
 export interface PaginacaoParams {
   page: number;
   limit: number;

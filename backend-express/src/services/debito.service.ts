@@ -1,5 +1,5 @@
 import { queryAsync, getAsync, runAsync } from '../database/db';
-import { Debito, DebitoCalculado, Veiculo } from '../types';
+import { Debito, DebitoCalculado, ResumoDebitos, ResumoDebitosPorTipo, Veiculo } from '../types';
 
 export function calcularTotais(debito: Debito): DebitoCalculado {
   const valorMulta = debito.valor * (debito.multa_percentual / 100);
@@ -54,6 +54,39 @@ export async function buscarDebitoPorId(id: number): Promise<DebitoCalculado | u
   const debito = await getAsync<Debito>('SELECT * FROM debitos WHERE id = ?', [id]);
   if (!debito) return undefined;
   return calcularTotais(debito);
+}
+
+export async function resumoPorPlaca(placa: string): Promise<ResumoDebitos>{
+
+  const veiculo = await getAsync<Veiculo>(
+    'SELECT * FROM veiculos WHERE placa = ?',
+    [placa.toUpperCase()]
+  );
+
+  if (!veiculo) {
+    throw new Error('Veículo não encontrado');
+  }
+
+  const debitos = await buscarDebitosPorPlaca(veiculo.placa);
+
+  const valorTotalPorTipo:ResumoDebitosPorTipo = {};
+  let valorTotal = 0;
+
+  debitos.forEach((deb)=>{
+    valorTotal += deb.valor_total;
+    valorTotalPorTipo[deb.tipo] = Number(((valorTotalPorTipo[deb.tipo] ?? 0) + deb.valor_total).toFixed(2));
+  });
+
+  const resumo : ResumoDebitos = {
+    placa: veiculo.placa,
+    proprietario: veiculo.proprietario,
+    totalDebitos: debitos.length,
+    valorTotal: Number(valorTotal.toFixed(2)),
+    porTipo: valorTotalPorTipo
+  }
+
+  return resumo;
+
 }
 
 export async function criarDebito(dados: Omit<Debito, 'id' | 'criado_em'>): Promise<DebitoCalculado> {
