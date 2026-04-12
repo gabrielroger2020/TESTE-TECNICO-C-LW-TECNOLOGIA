@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { autenticar } from '../services/auth.service';
 
-const loginSchema = z.object({
+const loginSchema = z.strictObject({
   email: z.string().email('E-mail inválido'),
   senha: z.string().min(1, 'Senha obrigatória'),
 });

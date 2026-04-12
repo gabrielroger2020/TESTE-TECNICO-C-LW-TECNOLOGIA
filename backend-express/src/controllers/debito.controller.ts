@@ -7,7 +7,7 @@ import {
   atualizarStatusDebito,
 } from '../services/debito.service';
 
-const criarDebitoSchema = z.object({
+const criarDebitoSchema = z.strictObject({
   veiculo_id: z.number().int().positive(),
   tipo: z.enum(['IPVA', 'MULTA', 'LICENCIAMENTO', 'DPVAT']),
   descricao: z.string().min(3),
@@ -18,14 +18,14 @@ const criarDebitoSchema = z.object({
   status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']).default('PENDENTE'),
 });
 
-const listaDebitosQuerySchema = z.object({
+const listarDebitosQuerySchema = z.strictObject({
   status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']).optional(),
   tipo: z.enum(['IPVA','MULTA','LICENCIAMENTO','DPVAT']).optional()
-})
+});
 
 export async function listarPorPlaca(req: Request, res: Response): Promise<void> {
   const { placa } = req.params;
-  const parsed = listaDebitosQuerySchema.safeParse(req.query);
+  const parsed = listarDebitosQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {
     res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
@@ -80,7 +80,7 @@ export async function criar(req: Request, res: Response): Promise<void> {
 
 export async function atualizarStatus(req: Request, res: Response): Promise<void> {
   const id = parseInt(req.params.id);
-  const statusSchema = z.object({ status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']) });
+  const statusSchema = z.strictObject({ status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']) });
 
   const parsed = statusSchema.safeParse(req.body);
   if (!parsed.success || isNaN(id)) {

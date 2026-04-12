@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { listarVeiculos, buscarPorPlaca, criarVeiculo, validarPlaca } from '../services/veiculo.service';
 
-const criarVeiculoSchema = z.object({
+const criarVeiculoSchema = z.strictObject({
   placa: z.string().min(7).max(8),
   renavam: z.string().length(11),
   proprietario: z.string().min(3),
