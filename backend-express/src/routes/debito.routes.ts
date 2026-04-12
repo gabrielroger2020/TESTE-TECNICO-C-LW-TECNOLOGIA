@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { listarPorPlaca, buscarPorId, criar, atualizarStatus, resumo } from '../controllers/debito.controller';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/resumo', resumo);
-router.get('/veiculo/:placa', listarPorPlaca);
-router.get('/:id', buscarPorId);
-router.post('/', criar);
-router.patch('/:id/status', atualizarStatus);
+router.get('/resumo', authMiddleware, resumo);
+router.get('/veiculo/:placa', authMiddleware, listarPorPlaca);
+router.get('/:id', authMiddleware, buscarPorId);
+router.post('/', authMiddleware, criar);
+router.patch('/:id/status', authMiddleware, atualizarStatus);
 
 export default router;
