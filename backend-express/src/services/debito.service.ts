@@ -25,23 +25,25 @@ export async function buscarDebitosPorPlaca(placa: string, status?: string, tipo
     throw new Error('Veículo não encontrado');
   }
 
-  let sqlDebitos = 'SELECT * FROM debitos WHERE veiculo_id = ?';
   const parametros: unknown[] = [veiculo.id];
+  const where: string[] = ['veiculo_id = ?']
 
   if(status){
-    sqlDebitos += ' AND status = ?';
+    where.push('status = ?');
     parametros.push(status);
   }
 
   if(tipo){
-    sqlDebitos += ' AND tipo = ?';
+    where.push('tipo = ?');
     parametros.push(tipo);
   }
 
-  sqlDebitos += ' ORDER BY vencimento ASC';
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  let sqlLista = `SELECT * FROM debitos ${whereSql} ORDER BY vencimento ASC`;
 
   const debitos = await queryAsync<Debito>(
-    sqlDebitos,
+    sqlLista,
     parametros
   );
 
