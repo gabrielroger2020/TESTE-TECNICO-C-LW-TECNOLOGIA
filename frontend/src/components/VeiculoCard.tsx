@@ -57,7 +57,7 @@ export default function VeiculoCard({ veiculo }: Props) {
           href={`/veiculo/${veiculo.placa}`}
           className="text-sm text-blue-600 hover:underline"
         >
-          Ver détalhes →
+          Ver detalhes →
         </Link>
       </div>
     </div>
