@@ -5,7 +5,7 @@ export function calcularTotais(debito: Debito): DebitoCalculado {
   const valorMulta = debito.valor * (debito.multa_percentual / 100);
 
   const valorComMulta = debito.valor + valorMulta;
-  const valorJuros = valorComMulta * (debito.juros_percentual / 100);
+  const valorJuros = debito.valor * (debito.juros_percentual / 100);
 
   return {
     ...debito,
