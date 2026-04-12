@@ -63,7 +63,7 @@ export default function DebitosList({ debitos }: Props) {
             </div>
             <div className="text-right ml-4">
               <p className="text-base font-bold text-gray-900">
-                {formatarMoeda(debito.valor_total)}
+                {formatarMoeda(debito.valor)}
               </p>
               {debito.valor_multa > 0 && (
                 <p className="text-xs text-red-500">
