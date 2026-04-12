@@ -15,7 +15,7 @@ export function calcularTotais(debito: Debito): DebitoCalculado {
   };
 }
 
-export async function buscarDebitosPorPlaca(placa: string): Promise<DebitoCalculado[]> {
+export async function buscarDebitosPorPlaca(placa: string, status?: string, tipo?: string): Promise<DebitoCalculado[]> {
   const veiculo = await getAsync<Veiculo>(
     'SELECT * FROM veiculos WHERE placa = ?',
     [placa.toUpperCase()]
@@ -25,9 +25,24 @@ export async function buscarDebitosPorPlaca(placa: string): Promise<DebitoCalcul
     throw new Error('Veículo não encontrado');
   }
 
+  let sqlDebitos = 'SELECT * FROM debitos WHERE veiculo_id = ?';
+  const parametros: unknown[] = [veiculo.id];
+
+  if(status){
+    sqlDebitos += ' AND status = ?';
+    parametros.push(status);
+  }
+
+  if(tipo){
+    sqlDebitos += ' AND tipo = ?';
+    parametros.push(tipo);
+  }
+
+  sqlDebitos += ' ORDER BY vencimento ASC';
+
   const debitos = await queryAsync<Debito>(
-    'SELECT * FROM debitos WHERE veiculo_id = ? ORDER BY vencimento ASC',
-    [(veiculo as unknown as Veiculo).id]
+    sqlDebitos,
+    parametros
   );
 
   return debitos.map(calcularTotais);

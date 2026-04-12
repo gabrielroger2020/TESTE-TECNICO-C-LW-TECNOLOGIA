@@ -18,11 +18,25 @@ const criarDebitoSchema = z.object({
   status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']).default('PENDENTE'),
 });
 
+const listaDebitosQuerySchema = z.object({
+  status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']).optional(),
+  tipo: z.enum(['IPVA','MULTA','LICENCIAMENTO','DPVAT']).optional()
+})
+
 export async function listarPorPlaca(req: Request, res: Response): Promise<void> {
   const { placa } = req.params;
+  const parsed = listaDebitosQuerySchema.safeParse(req.query);
 
+  if (!parsed.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
+    return;
+  }
+  
+  const status = parsed.data.status as string | undefined;
+  const tipo = parsed.data.tipo as string | undefined;
+  
   try {
-    const debitos = await buscarDebitosPorPlaca(placa);
+    const debitos = await buscarDebitosPorPlaca(placa, status, tipo);
     res.json(debitos);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro ao buscar débitos';
