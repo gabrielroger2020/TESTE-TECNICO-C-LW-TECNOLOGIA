@@ -64,3 +64,21 @@ export interface RespostaPaginada<T> {
   page: number;
   limit: number;
 }
+
+export interface QuitarDebitoResponse {
+  mensagem?: string;
+  debito: DebitoCalculado;
+};
+
+export interface ErroComResponse{
+  response?: {
+    status?: number;
+    data?: {
+      erro?: string;
+    };
+  };
+};
+
+export function isErroComResponse(err: unknown): err is ErroComResponse {
+  return typeof err === 'object' && err !== null && 'response' in err;
+}
