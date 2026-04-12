@@ -24,8 +24,8 @@ function formatarMoeda(valor: number): string {
 }
 
 function formatarData(dataStr: string): string {
-  const data = new Date(dataStr);
-  return data.toLocaleDateString('pt-BR');
+  const [ano, mes, dia] = dataStr.split('-');
+  return `${dia}/${mes}/${ano}`;
 }
 
 export default function DebitosList({ debitos }: Props) {
