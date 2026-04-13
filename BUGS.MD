@@ -64,3 +64,6 @@
 
 ## Melhoria 2 – Validação
 - Descrição: A validação de placa agora é feita dentro dos schemas, antes quando precisava validar uma placa, primeiro era validado o schema e depois a placa, ocorria no mínimo 2 processos de validação. Agora como a validação da placa ocorre no schema, é executado 1 processo de validação a menos.
+
+## Melhoria 3 – Notificação
+- Descrição: O retorno de algumas requisições (por exemplo, a de quitar débitos) são exibidos em formato de notificação, um feedback visual. 
