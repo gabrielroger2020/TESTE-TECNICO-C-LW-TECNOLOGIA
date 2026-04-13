@@ -11,7 +11,7 @@ export default function Paginacao({paginaAtual, totalPaginas, onMudar}: Props){
     return(<div className="w-full justify-center py-3">
         <div className="flex justify-center gap-2">
 
-            <button className={`text-sm hover:bg-blue-900 px-3 py-1.5 rounded transition bg-gray-100`} disabled={paginaAtual === 1} onClick={()=>{onMudar(paginaAtual - 1)}}>
+            <button className={`text-sm hover:bg-blue-900 px-3 py-1.5 rounded transition bg-gray-100`} disabled={paginaAtual === 1 || totalPaginas === 0} onClick={()=>{onMudar(paginaAtual - 1)}}>
                 ←
             </button>
 
@@ -21,7 +21,7 @@ export default function Paginacao({paginaAtual, totalPaginas, onMudar}: Props){
                 </button>
             ))}
 
-            <button className={`text-sm hover:bg-blue-900 px-3 py-1.5 rounded transition bg-gray-100`} disabled={paginaAtual === totalPaginas} onClick={()=>{onMudar(paginaAtual + 1)}}>
+            <button className={`text-sm hover:bg-blue-900 px-3 py-1.5 rounded transition bg-gray-100`} disabled={(paginaAtual === totalPaginas) || totalPaginas === 0} onClick={()=>{onMudar(paginaAtual + 1)}}>
                 →
             </button>
 
