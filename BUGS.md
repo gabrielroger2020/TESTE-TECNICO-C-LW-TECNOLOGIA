@@ -67,3 +67,7 @@
 
 ## Melhoria 3 – Notificação
 - Descrição: O retorno de algumas requisições (por exemplo, a de quitar débitos) são exibidos em formato de notificação, um feedback visual. 
+
+# MELHORIAS QUE EU FARIA CASO HOUVESSE MAIS TEMPO, FORA AS SUGERIDAS
+## Melhoria 1 – Listagem de Veículos
+- Descrição: No frontend eu refatoraria a listagem de veículos para seguir uma estrutura semelhante à listagem de débitos, extraindo a responsabilidade de renderização para um componente VeiculoList.tsx, que ficaria encarregado de renderizar os VeiculoCard.tsx e seria utilizado na página principal. Além disso, no backend eu criaria uma rota que retornasse os dados dos veículos já acompanhados da quantidade de débitos em aberto, evitando que cada VeiculoCard.tsx precise fazer sua própria requisição. Atualmente, cada veículo renderizado dispara uma chamada adicional para consultar débitos, caracterizando um comportamento N+1 e aumentando desnecessariamente o número de requisições.
