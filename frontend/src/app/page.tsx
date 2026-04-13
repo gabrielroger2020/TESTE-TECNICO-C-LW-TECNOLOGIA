@@ -15,9 +15,6 @@ export default function HomePage() {
   const [erro, setErro] = useState('');
   const [busca, setBusca] = useState('');
 
-  // FEATURE FALTANDO: Os estados de paginação abaixo existem mas não há componente
-  // de paginação implementado. A API retorna { data, total, page, limit }
-  // mas o frontend ignora `total` e não oferece navegação entre páginas.
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalRegistros, setTotalRegistros] = useState(0);
   const LIMITE = 5;
