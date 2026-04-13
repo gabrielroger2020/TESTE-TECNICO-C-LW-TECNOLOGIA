@@ -1,3 +1,5 @@
+> Backend escolhido: backend-express.
+
 # BUGS
 
 ## Bug 1 – Autenticação

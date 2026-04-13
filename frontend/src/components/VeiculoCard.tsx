@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Veiculo, DebitoCalculado } from '@/lib/api';
 import api, { API_PREFIX } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 interface Props {
   veiculo: Veiculo;
@@ -23,7 +24,10 @@ export default function VeiculoCard({ veiculo }: Props) {
         );
         setTotalDebitos(pendentes.length);
       })
-      .catch(() => setTotalDebitos(0))
+      .catch(() => {
+        toast.error(`Ocorreu um erro ao buscar os débitos da placa ${veiculo.placa}`)
+        setTotalDebitos(0)
+      })
       .finally(() => setCarregando(false));
   }, []);
 
