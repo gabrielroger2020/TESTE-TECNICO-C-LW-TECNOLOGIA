@@ -18,6 +18,14 @@ export default function VeiculoPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
+  function handleDebitoQuitado(debitoAtualizado: DebitoCalculado) {
+    setDebitos((atuais) =>
+      atuais.map((debito) =>
+        debito.id === debitoAtualizado.id ? debitoAtualizado : debito
+      )
+    );
+  }
+
   useEffect(() => {
     if (!estaAutenticado()) {
       router.push('/login');
@@ -39,7 +47,6 @@ export default function VeiculoPage() {
         setCarregando(false);
       }
     }
-
     carregar();
   }, [placa, router]);
 
@@ -93,7 +100,7 @@ export default function VeiculoPage() {
 
             {/* Lista de débitos */}
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Débitos</h3>
-            <DebitosList debitos={debitos} />
+            <DebitosList debitos={debitos} onQuitar={handleDebitoQuitado}/>
           </>
         ) : null}
       </main>
