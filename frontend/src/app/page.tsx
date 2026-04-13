@@ -6,6 +6,7 @@ import api, { API_PREFIX, Veiculo, RespostaPaginada } from '@/lib/api';
 import { estaAutenticado } from '@/lib/auth';
 import Header from '@/components/Header';
 import VeiculoCard from '@/components/VeiculoCard';
+import Paginacao from '@/components/Paginacao';
 
 export default function HomePage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function HomePage() {
   // FEATURE FALTANDO: Os estados de paginação abaixo existem mas não há componente
   // de paginação implementado. A API retorna { data, total, page, limit }
   // mas o frontend ignora `total` e não oferece navegação entre páginas.
-  const [paginaAtual] = useState(1);
+  const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalRegistros, setTotalRegistros] = useState(0);
   const LIMITE = 5;
 
@@ -100,14 +101,9 @@ export default function HomePage() {
               <p className="text-center text-gray-500 py-10">Nenhum veículo encontrado.</p>
             )}
 
-            {/* FEATURE FALTANDO: Implementar componente de paginação aqui.
-                Use as variáveis `paginaAtual`, `totalPaginas` e `setPaginaAtual`
-                para renderizar os controles de navegação. */}
-            <div className="mt-6 flex justify-center">
-              <p className="text-xs text-gray-400">
-                Página {paginaAtual} de {totalPaginas} — paginação não implementada
-              </p>
-            </div>
+            <Paginacao paginaAtual={paginaAtual} totalPaginas={totalPaginas} onMudar={setPaginaAtual}>
+
+            </Paginacao>
           </>
         )}
       </main>
