@@ -20,7 +20,7 @@
 ## Bug 4 – Filtro
 - Descrição: A rota responsável “aceitava” os query params `status` e `tipo`, porém não utilizava para filtrar os débitos, assim como mencionado no bug B6 na tabela de prévia de bugs. Na verdade, essa função de filtrar débitos não estava implementada, o que eu fiz foi incluir no projeto essa possibilidade.
 - Localização: `backend-express`, os arquivos modificados foram `debito.controller.ts` e `debito.service.ts`.
-- Solução: A solução inicialmente foi modificar os parâmetros da função `buscarDebitosPorPlaca` (`debito.service.ts`), incluí mais 2 parâmetros: `status?: string` e `tipo?:string`. Em seguida ao invés de declarar o sql direto na função `queryAsync`, armazenei ele em uma variável e fiz 2 verificações com `if` para incluir ou não os filtros de `status` e `tipo` na cláusula `Where` do sql. No arquivo `debito.controller.ts` criei um zod object para validar o payload que iria vir via query params na rota da api.
+- Solução: A solução inicialmente foi modificar os parâmetros da função `buscarDebitosPorPlaca` (`debito.service.ts`), incluí mais 2 parâmetros: `status?: string` e `tipo?:string`. Em seguida ao invés de declarar o sql direto na função `queryAsync`, armazenei ele em uma variável e fiz 2 verificações com `if` para incluir ou não os filtros de `status` e `tipo` na cláusula `Where` do sql. No arquivo `debito.schema.ts` criei um zod object para validar o payload que iria vir via query params na rota da api.
 
 ## Bug 5 – HTTP
 - Descrição: A rota de criação de veiculo (`veiculo.controller.ts`) retorna status `200` (`OK`), ao invés de retornar status `201` (`CREATED`).
