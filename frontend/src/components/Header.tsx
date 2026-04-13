@@ -2,12 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { fazerLogout } from '@/lib/auth';
+import toast from 'react-hot-toast';
 
 export default function Header() {
   const router = useRouter();
 
   function handleLogout() {
     fazerLogout();
+    toast.success('Sessão encerrada');
     router.push('/login');
   }
 

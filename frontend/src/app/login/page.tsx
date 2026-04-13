@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fazerLogin } from '@/lib/auth';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function LoginPage() {
 
     try {
       await fazerLogin(email, senha);
+      toast.success("Login realizado com sucesso");
       router.push('/');
     } catch {
       setErro('E-mail ou senha inválidos');

@@ -31,8 +31,8 @@ export async function listarVeiculos(
   }
 
   if (filtros.placa?.trim()) {
-    where.push('placa = ?');
-    parametros.push(filtros.placa.trim().toUpperCase());
+    where.push('placa LIKE ? COLLATE NOCASE');
+    parametros.push(`%${filtros.placa.trim()}%`);
   }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';

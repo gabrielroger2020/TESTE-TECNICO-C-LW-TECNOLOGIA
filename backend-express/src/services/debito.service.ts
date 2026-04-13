@@ -74,14 +74,14 @@ export async function resumoPorPlaca(placa: string): Promise<ResumoDebitos>{
 
   debitos.forEach((deb)=>{
     valorTotal += deb.valor_total;
-    valorTotalPorTipo[deb.tipo] = Number(((valorTotalPorTipo[deb.tipo] ?? 0) + deb.valor_total).toFixed(2));
+    valorTotalPorTipo[deb.tipo] = (valorTotalPorTipo[deb.tipo] ?? 0) + deb.valor_total;
   });
 
   const resumo : ResumoDebitos = {
     placa: veiculo.placa,
     proprietario: veiculo.proprietario,
     totalDebitos: debitos.length,
-    valorTotal: Number(valorTotal.toFixed(2)),
+    valorTotal: valorTotal,
     porTipo: valorTotalPorTipo
   }
 

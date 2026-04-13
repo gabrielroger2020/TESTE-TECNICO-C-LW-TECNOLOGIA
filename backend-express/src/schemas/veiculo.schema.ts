@@ -1,5 +1,5 @@
 import z from "zod";
-import { placaValueSchema } from "./common.schema";
+import { placaFiltroSchema, placaValueSchema } from "./common.schema";
 
 export const criarVeiculoSchema = z.strictObject({
   placa: placaValueSchema,
@@ -16,7 +16,7 @@ export const paginacaoSchema = z.strictObject({
 });
 
 export const filtroVeiculosSchema = z.strictObject({
-  placa: placaValueSchema.optional(),
+  placa: placaFiltroSchema.optional(),
   proprietario: z.string().optional(),
   modelo: z.string().optional(),
   anoMin: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1).optional(),

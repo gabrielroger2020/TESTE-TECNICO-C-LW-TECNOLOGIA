@@ -14,6 +14,7 @@ export default function HomePage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [busca, setBusca] = useState('');
+  const [tipoFiltro, setTipoFiltro] = useState<'placa' | 'proprietario' | 'modelo'>('placa');
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalRegistros, setTotalRegistros] = useState(0);
@@ -25,30 +26,38 @@ export default function HomePage() {
       return;
     }
     carregarVeiculos();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginaAtual]);
+
+  }, [paginaAtual, busca, tipoFiltro]);
 
   async function carregarVeiculos() {
     setCarregando(true);
     try {
+
+      const query = new URLSearchParams({
+        page: String(paginaAtual),
+        limit: String(LIMITE)
+      });
+
+      const termo = busca.trim();
+
+      if (termo && termo != '') {
+        query.set(tipoFiltro, termo);
+      }
+
       const { data } = await api.get<RespostaPaginada<Veiculo>>(
-        `${API_PREFIX}/veiculos?page=${paginaAtual}&limit=${LIMITE}`
+        `${API_PREFIX}/veiculos?${query.toString()}`
       );
       setVeiculos(data.data);
       setTotalRegistros(data.total);
-    } catch {
+      setErro('');
+    } catch(err) {
       setErro('Erro ao carregar veículos. Tente novamente.');
+      setVeiculos([]);
+      setTotalRegistros(0)
     } finally {
       setCarregando(false);
     }
   }
-
-  const veiculosFiltrados = veiculos.filter(
-    (v) =>
-      v.placa.toLowerCase().includes(busca.toLowerCase()) ||
-      v.proprietario.toLowerCase().includes(busca.toLowerCase()) ||
-      v.modelo.toLowerCase().includes(busca.toLowerCase())
-  );
 
   const totalPaginas = Math.ceil(totalRegistros / LIMITE);
 
@@ -64,13 +73,26 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 flex gap-2">
+
+          <select className='w-[20%] border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500' onChange={(e) => {
+            setTipoFiltro(e.target.value as 'placa' | 'proprietario' | 'modelo');
+            setPaginaAtual(1);
+          }}>
+            <option value={'placa'}>Placa</option>
+            <option value={'proprietario'}>Proprietario</option>
+            <option value={'modelo'}>Modelo</option>
+          </select>
+
           <input
             type="text"
             value={busca}
-            onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar por placa, proprietário ou modelo..."
             className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => {
+              setBusca(e.target.value);
+              setPaginaAtual(1);
+            }}
           />
         </div>
 
@@ -89,12 +111,12 @@ export default function HomePage() {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {veiculosFiltrados.map((v) => (
+              {veiculos.map((v) => (
                 <VeiculoCard key={v.id} veiculo={v} />
               ))}
             </div>
 
-            {veiculosFiltrados.length === 0 && !carregando && (
+            {veiculos.length === 0 && !carregando && (
               <p className="text-center text-gray-500 py-10">Nenhum veículo encontrado.</p>
             )}
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import toast from 'react-hot-toast';
 
 export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || '/api';
 
@@ -20,6 +21,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       Cookies.remove('token');
+
+      toast.error("Acesso não autorizado");
+
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
       }

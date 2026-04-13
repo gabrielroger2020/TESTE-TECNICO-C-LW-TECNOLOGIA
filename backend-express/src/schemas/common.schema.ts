@@ -12,3 +12,10 @@ export const placaValueSchema = z.string().refine(validarPlaca, {
 export const placaSchema = z.strictObject({
   placa: placaValueSchema
 })
+
+export const placaFiltroSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .min(1)
+  .max(8);

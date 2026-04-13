@@ -21,7 +21,7 @@ export async function relatorioInadimplencia(): Promise<RelatorioInadimplencia> 
     };
 
     atual.totalDebitosVencidos += 1;
-    atual.valorTotalVencido = Number((atual.valorTotalVencido + valorTotalDebito).toFixed(2));
+    atual.valorTotalVencido = atual.valorTotalVencido + valorTotalDebito;
 
     mapa.set(deb.placa, atual);
   })
@@ -30,7 +30,7 @@ export async function relatorioInadimplencia(): Promise<RelatorioInadimplencia> 
     (a,b) => b.valorTotalVencido - a.valorTotalVencido
   );
 
-  const valorTotalGeral = Number((veiculos.reduce((acumulador, veiculoAtual) => acumulador + veiculoAtual.valorTotalVencido, 0)).toFixed(2));
+  const valorTotalGeral = veiculos.reduce((acumulador, veiculoAtual) => acumulador + veiculoAtual.valorTotalVencido, 0);
 
   return {
     veiculos,
