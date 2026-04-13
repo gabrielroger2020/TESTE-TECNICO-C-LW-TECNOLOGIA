@@ -1,12 +1,6 @@
 import { queryAsync, getAsync, runAsync } from '../database/db';
 import { Veiculo, RespostaPaginada, ListarVeiculosFiltros, PaginacaoParams } from '../types';
 
-export function validarPlaca(placa: string): boolean {
-  // Formato antigo: ABC1234 | Formato Mercosul: ABC1D23
-  const regex = /^[A-Z]{3}\d{1}[A-Z0-9]{1}\d{2}$/;
-  return regex.test(placa);
-}
-
 export async function listarVeiculos(
   paginacao: PaginacaoParams,
   filtros: ListarVeiculosFiltros = {}

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { z } from 'zod';
 import {
   buscarDebitosPorPlaca,
   buscarDebitoPorId,
@@ -8,30 +7,11 @@ import {
   quitarDebito,
   resumoPorPlaca,
 } from '../services/debito.service';
-import { validarPlaca } from '../services/veiculo.service';
-
-const criarDebitoSchema = z.strictObject({
-  veiculo_id: z.number().int().positive(),
-  tipo: z.enum(['IPVA', 'MULTA', 'LICENCIAMENTO', 'DPVAT']),
-  descricao: z.string().min(3),
-  valor: z.number().positive(),
-  multa_percentual: z.number().min(0).default(0),
-  juros_percentual: z.number().min(0).default(0),
-  vencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato YYYY-MM-DD'),
-  status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']).default('PENDENTE'),
-});
-
-const listarDebitosQuerySchema = z.strictObject({
-  status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']).optional(),
-  tipo: z.enum(['IPVA','MULTA','LICENCIAMENTO','DPVAT']).optional()
-});
-
-const resumoQuerySchema = z.strictObject({
-  placa: z.string().min(7).max(8)
-})
+import { criarDebitoSchema, listarDebitosQuerySchema, statusDebitoSchema } from '../schemas/debito.schema';
+import { idSchema, placaSchema } from '../schemas/common.schema';
 
 export async function listarPorPlaca(req: Request, res: Response): Promise<void> {
-  const { placa } = req.params;
+  const parsedParams = placaSchema.safeParse(req.params);
   const parsed = listarDebitosQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {
@@ -39,8 +19,8 @@ export async function listarPorPlaca(req: Request, res: Response): Promise<void>
     return;
   }
 
-  if(!validarPlaca(placa)){
-    res.status(400).json({ erro: 'Formato de placa inválido' });
+  if(!parsedParams.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsedParams.error.flatten() });
     return;
   }
   
@@ -48,7 +28,7 @@ export async function listarPorPlaca(req: Request, res: Response): Promise<void>
   const tipo = parsed.data.tipo as string | undefined;
   
   try {
-    const debitos = await buscarDebitosPorPlaca(placa, status, tipo);
+    const debitos = await buscarDebitosPorPlaca(parsedParams.data.placa, status, tipo);
     res.json(debitos);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro ao buscar débitos';
@@ -57,14 +37,16 @@ export async function listarPorPlaca(req: Request, res: Response): Promise<void>
 }
 
 export async function buscarPorId(req: Request, res: Response): Promise<void> {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    res.status(400).json({ erro: 'ID inválido' });
+
+  const parsed = idSchema.safeParse(req.params);
+
+  if (!parsed.success) {
+    res.status(400).json({ erro: 'ID inválido', detalhes: parsed.error.flatten() });
     return;
   }
 
   try {
-    const debito = await buscarDebitoPorId(id);
+    const debito = await buscarDebitoPorId(parsed.data.id);
     if (!debito) {
       res.status(404).json({ erro: 'Débito não encontrado' });
       return;
@@ -76,7 +58,9 @@ export async function buscarPorId(req: Request, res: Response): Promise<void> {
 }
 
 export async function criar(req: Request, res: Response): Promise<void> {
+
   const parsed = criarDebitoSchema.safeParse(req.body);
+
   if (!parsed.success) {
     res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
     return;
@@ -91,17 +75,22 @@ export async function criar(req: Request, res: Response): Promise<void> {
 }
 
 export async function atualizarStatus(req: Request, res: Response): Promise<void> {
-  const id = parseInt(req.params.id);
-  const statusSchema = z.strictObject({ status: z.enum(['PENDENTE', 'PAGO', 'VENCIDO']) });
 
-  const parsed = statusSchema.safeParse(req.body);
-  if (!parsed.success || isNaN(id)) {
-    res.status(400).json({ erro: 'Dados inválidos' });
+  const parsedParams = idSchema.safeParse(req.params);
+  const parsed = statusDebitoSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
+    return;
+  }
+
+  if (!parsedParams.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsedParams.error.flatten() });
     return;
   }
 
   try {
-    await atualizarStatusDebito(id, parsed.data.status);
+    await atualizarStatusDebito(parsedParams.data.id, parsed.data.status);
     res.json({ mensagem: 'Status atualizado com sucesso' });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro ao atualizar status';
@@ -110,16 +99,17 @@ export async function atualizarStatus(req: Request, res: Response): Promise<void
 }
 
 export async function quitar(req: Request, res: Response): Promise<void> {
-  const id = parseInt(req.params.id);
 
-  if (isNaN(id)) {
-    res.status(400).json({ erro: 'Dados inválidos' });
+  const parsedParams = idSchema.safeParse(req.params);
+
+  if (!parsedParams.success) {
+    res.status(400).json({ erro: 'Dados inválidos', detalhes: parsedParams.error.flatten() });
     return;
   }
 
   try{
 
-    const debito = await quitarDebito(id);
+    const debito = await quitarDebito(parsedParams.data.id);
     res.json({
       mensagem: 'Débito quitado com sucesso!',
       debito
@@ -146,15 +136,11 @@ export async function quitar(req: Request, res: Response): Promise<void> {
 }
 
 export async function resumo(req: Request, res: Response): Promise<void> {
-  const parsed = resumoQuerySchema.safeParse(req.query);
+
+  const parsed = placaSchema.safeParse(req.query);
 
   if (!parsed.success) {
     res.status(400).json({ erro: 'Dados inválidos', detalhes: parsed.error.flatten() });
-    return;
-  }
-
-  if(!validarPlaca(parsed.data.placa)){
-    res.status(400).json({ erro: 'Formato de placa inválido' });
     return;
   }
 
